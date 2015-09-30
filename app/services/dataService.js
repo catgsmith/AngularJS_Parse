@@ -1,30 +1,22 @@
-(function() {
+(function() {	
 
-    angular.module('myApp')
-        .factory('dataService', dataService);
+    angular.module('myApp').factory('dataService', dataService);
 
 
     function dataService($q) {
-    	// Declaring the type
-    	var Driver = Parse.Object.extend("Driver");
-
-   		Object.defineProperty(Driver, 'fullname', {
-    			get: function() {return (this.get("firstName") + " " + this.get("surname")); }
-    		});
-    		
-    
-		
         // Expose properties as API
         return {
-        	getDriver: getDriver,
-            getVehicles: getVehicles
+        	getDriverData: getDriverData,
+            getAllVehiclesData: getAllVehiclesData
 
         };
-		function getDriver(jobId) {
+		function getDriverData(driverId) {
+			// Declaring the type
+    		var Driver = Parse.Object.extend("Driver");
 			var defer = $q.defer();
  
 			var driverQuery = new Parse.Query(Driver);
-			driverQuery.equalTo('objectId', jobId);
+			driverQuery.equalTo('objectId', driverId);
 			driverQuery.first({
 			 success: function(results) {
 			     defer.resolve(results);
@@ -37,15 +29,23 @@
 			return defer.promise;
 		}
 
-        function getVehicles() {
+        function getAllVehiclesData() {
+        	// Declaring the type
+    		var Vehicle = Parse.Object.extend("Vehicle");
+        	var defer = $q.defer();
 
-			var vehicles = [];
-			var vehicle = {};
-			vehicle.nextService = new Date(2015,10,1);
-			vehicle.reg = "11GH 1111";
-			vehicles.push(vehicle);
-
-			return vehicles;
+        	var vehicleQuery = new Parse.Query(Vehicle);
+        	vehicleQuery.find ({
+        		success: function(results) {
+        			// The collection retrieved successfully.
+        			defer.resolve(results);
+        		}, error: function(object, error){
+        			// The collection not retrieved successfully.
+        			console.log("Parse Error: "+ error.message);
+        			defer.reject(error);	
+        		}
+        	});   
+        	return defer.promise;
         }
     }
 
