@@ -13,6 +13,7 @@
     <script src="app/app.js"></script>
 	<script src="app/services/dataService.js"></script>
 	<script src="app/domain/driverModel.js"></script>
+	<script src="app/domain/defectsModel.js"></script>
 	<script src="app/domain/vehicleModel.js"></script>
   </head>
   <body ng-controller="myController">
@@ -22,16 +23,22 @@
 		<div class="container">
 			<div class="row">
 				<div class="col-md-5">
-		 		<table class="table table-bordered">
-					<tr>
-						<th>Reg</th>
-						<th>Service date</th>
-					</tr>
-					<tr ng-repeat="vehicle in vehicles">
-						<td>{{vehicle.reg}}</td>
-						<td>{{vehicle.nextService.iso | date:'short'}}</td>
-					</tr>
-				</table> 
+					<table class="table table-bordered">
+						<tr>
+							<th>Reg</th>
+							<th>Make</th>
+							<th>Model</th>
+							<th>Job ID</th>
+							<th>Driver</th>
+						</tr>
+						<tr ng-repeat="job in defectJobs">
+							<td>{{job.reg}}</td>
+							<td>{{job.make}}</td>
+							<td>{{job.model}}</td>
+							<td>{{job.jobId}}</td>
+							<td>{{job.driver}}</td>
+						</tr>
+					</table> 
 				</div>
 			</div>
 		</div>
