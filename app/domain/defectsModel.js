@@ -4,15 +4,17 @@
 
     function defectsModel($http, $q, dataService) {   
 
-            var defectJobs = []; 
+            var allDefectJobs = []; 
+
+            var vehicleDefectJob = null;
 
             return {
                 getAllDefectJobs: function() {
                    var defer = $q.defer();
 
                    dataService.getAllDefectsData().then(function (response) {
-                        defectJobs = JSON.parse(JSON.stringify(response));
-                        defer.resolve(defectJobs);
+                        allDefectJobs = JSON.parse(JSON.stringify(response));
+                        defer.resolve(allDefectJobs);
                     }, function(error) {
                         console.log("Parse error: " + error.message); 
                         defer.reject(error);      
@@ -20,8 +22,20 @@
                    return defer.promise;
                 },
                 getDefectJobs: function() {
-                   return defectJobs;
+                   return allDefectJobs;
                 }, 
+                getDefectJobforFleetNo: function(fleetNo) {
+                    indexes = $.map(allDefectJobs, function(obj, index) {
+                        // FleetNo has # subscript
+                        if(obj.fleetNo == "#" + fleetNo) {
+                            vehicleDefectJob = allDefectJobs[index];
+                            return vehicleDefectJob;
+                        }
+                    });
+
+                    //firstIndex = indexes[0];
+
+                    return vehicleDefectJob;                }
             };
     }  		
 })();

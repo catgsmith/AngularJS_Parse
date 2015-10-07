@@ -8,7 +8,9 @@
         return {
         	getDriverData: getDriverData,
             getAllVehiclesData: getAllVehiclesData,
-            getAllDefectsData: getAllDefectsData
+            getAllDefectsData: getAllDefectsData,
+            getAllJobsData: getAllJobsData,
+            getJobByDefectJobID: getJobByDefectJobID
 
         };
 		function getDriverData(driverId) {
@@ -31,23 +33,102 @@
 		}
 
         function getAllVehiclesData() {
-            	// Declaring the type
-        		var Vehicle = Parse.Object.extend("Vehicle");
-            	var defer = $q.defer();
+        	// Declaring the type
+    		var Vehicle = Parse.Object.extend("Vehicle");
+        	var defer = $q.defer();
 
-            	var vehicleQuery = new Parse.Query(Vehicle);
-            	vehicleQuery.find ({
-            		success: function(results) {
-            			// The collection retrieved successfully.
-            			defer.resolve(results);
-            		}, error: function(object, error){
-            			// The collection not retrieved successfully.
-            			console.log("Parse Error: "+ error.message);
-            			defer.reject(error);	
-            		}
-            	});   
-            	return defer.promise;
-            }
+        	var vehicleQuery = new Parse.Query(Vehicle);
+        	vehicleQuery.find ({
+        		success: function(results) {
+        			// The collection retrieved successfully.
+        			defer.resolve(results);
+        		}, error: function(object, error){
+        			// The collection not retrieved successfully.
+        			console.log("Parse Error: "+ error.message);
+        			defer.reject(error);	
+        		}
+        	});   
+        	return defer.promise;
+        }
+
+        function getAllJobsData() {
+            // Declaring the type
+            var Job = Parse.Object.extend("Joblist");
+            var jobQuery = new Parse.Query(Job);
+            var defer = $q.defer();
+
+
+            jobQuery.include("mechanic"); 
+            jobQuery.include("defectJob"); 
+
+           
+            var _joblist = [];          
+
+            var _buildJobList = function(results) {
+                _joblist = [];                
+
+                for (var i in results) {
+                    var job = {}; // new job list job
+                    job.joblistId = results[i].id;
+                    job.rank = results[i].get("rank"); 
+                    job.status = results[i].get("status"); 
+
+                    if(results[i].get("mechanic")) {
+                        var mechanic = results[i].get("mechanic");
+                        job.mechanicID = mechanic.id;
+                        job.mechanic = mechanic.get("firstName") + " " + mechanic.get("surname");   
+                    }
+
+                    if(results[i].get("defectJob")) {
+                        var defectJob = results[i].get("defectJob");
+                        job._defectJob = defectJob;
+                    }
+                    
+                    // LOAD THE JOB LIST WITH VEHICLES AND THEIR DEFECTS
+                    _joblist.push(job);
+                }
+                //console.log("GetAllJobsData: " +  JSON.stringify(_joblist));
+            };
+            
+            jobQuery.find ({
+                success: function(results) {
+                    _buildJobList(results);
+                    defer.resolve(_joblist);
+                }, error: function(object, error){
+                    // The collection not retrieved successfully.
+                    console.log("Parse Error: "+ error.message);
+                    defer.reject(error);    
+                }
+            }); 
+            return defer.promise;
+        }
+
+        function getJobByDefectJobID(defectJobId) {
+            /* Find the job on the JobList associated with the defect job */
+            var Job = Parse.Object.extend("Joblist");
+            
+            var jobQuery = new Parse.Query(Job);
+
+            jobQuery.equalTo('defectJob', {
+                __type: "Pointer",
+                className: "DefectJobs",
+                objectId: defectJobId
+            }); // select specific defect job
+
+            jobQuery.include("Mechanic"); // may not require mechanic
+
+            var defer = $q.defer();  
+
+            jobQuery.first({
+             success: function(results) {
+                 defer.resolve(results);
+             },
+             error: function(error) {
+                 defer.reject(error);
+             }
+            });  
+            return defer.promise;        
+        }
         
 
         function getAllDefectsData() {
@@ -59,19 +140,19 @@
             defectJobsQuery.include("driver");   
 
             var defer = $q.defer(); 
-            var _jobList = [];   
+            var _defectlist = [];   
 
-            var _buildJobList = function(results) {
-                _jobList = [];
+            var _buildDefectList = function(results) {
+                _defectlist = [];
 
                 for (var i in results) {
                     var job = {}; // new job list job
-                    job.jobId = results[i].id;
+                    job.defectJobID = results[i].id;
                     job.date = results[i].get("date"); 
-
+                    
                     if(results[i].get("vehicle")) {
                         var vehicle = results[i].get("vehicle");
-                        job._vehicle = vehicle;
+                        job.vehicleID = vehicle.id;
                         job.fleetNo = "#"+vehicle.get("fleetNo");               
                         job.reg = vehicle.get("reg");
                         job.make = vehicle.get("make");
@@ -81,7 +162,7 @@
 
                     if(results[i].get("driver")) {
                         var driver = results[i].get("driver");
-                        job._driver = driver;
+                        job.driverID = driver.id;
                         job.driver = driver.get("firstName") + " " + driver.get("surname");
                     }            
                     
@@ -95,7 +176,7 @@
 
                         if (allDefects[j]) {
                             var task = {};
-                            task._task = allDefects[j];
+                            task.taskID = allDefects[j].id;
                             task.desc = allDefects[j].get("desc");
                             task.startWork = "";
                             task.status = "";
@@ -114,15 +195,17 @@
                         }
                     }
                     // LOAD THE JOB LIST WITH VEHICLES AND THEIR DEFECTS
-                    _jobList.push(job);
+                    _defectlist.push(job);
                 } // end for loop 
-                //console.log("_buildJobList completed!");           
+                //console.log("_buildDefectList completed!"); 
+                _defectlist = _defectlist.slice(5,10);    // ONLY WANT THESE FIVE RECORDS FOR TESTING "TROTTLE" 
+                //console.log("dataservice defectlist: " +  JSON.stringify(_defectlist[0]));    
             };     
 
             defectJobsQuery.find({
                 success: function(results) {
-                    _buildJobList(results);
-                    defer.resolve(_jobList);
+                    _buildDefectList(results);
+                    defer.resolve(_defectlist);
                 },
                 error: function(error) {
                     console.log("Query error" + error.message);
@@ -133,6 +216,6 @@
             return defer.promise;
         }   
 
-
     }
+    
 }());
