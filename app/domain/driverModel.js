@@ -3,6 +3,7 @@
     angular.module('myApp').factory('driverModel', driverModel);
 
     function driverModel($http, $q, dataService) {   
+            var allDrivers = [];
 
             var driver = null;
             var firstName = null;
@@ -30,14 +31,25 @@
                     fullname = firstName + " " + surname;
                     return fullname;
                 },
+                getAllDriversData: function() {
+                    var defer = $q.defer();
+
+                    dataService.getAllDriversData().then(function(response) {
+                        allDrivers = JSON.parse(JSON.stringify(response));
+                        defer.resolve(allDrivers);
+                    }, function(error) {
+                        console.log("Parse error: " + error.message);
+                        defer.reject(error);
+                    });
+
+                    return defer.promise;
+                },
+                getAllDrivers: function() {
+                    return allDrivers;
+                },
                 getDriver: function() {
                     return driver;
                 }, 
-                getAllDrivers: function () {
-/*                  angular.forEach(driverList, function(value) {
-                        value.fullname = (value.firstName + ' ' + value.surname);
-                    });*/
-                },
             };
     }  
 })();

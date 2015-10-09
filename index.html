@@ -12,9 +12,9 @@
     <script src='config/values.js'></script> 
     <script src="app/app.js"></script>
 	<script src="app/services/dataService.js"></script>
+	<script src="app/services/entityService.js"></script>
 	<script src="app/domain/driverModel.js"></script>
 	<script src="app/domain/defectsModel.js"></script>
-	<script src="app/domain/jobsModel.js"></script>	
 	<script src="app/domain/vehicleModel.js"></script>
   </head>
   <body ng-controller="myController">
@@ -29,17 +29,17 @@
 							<th>Reg</th>
 							<th>Make</th>
 							<th>Model</th>
-							<th>Defect Job ID</th>
+							<th>Vehicle ID</th>
 							<th>Fleet No</th>
-							<th>Driver</th>
+							<th>Next Service</th>
 						</tr>
-						<tr ng-repeat="job in defectJobs">
-							<td>{{job.reg}}</td>
-							<td>{{job.make}}</td>
-							<td>{{job.model}}</td>
-							<td>{{job.defectJobID}}</td>
-							<td>{{job.fleetNo}}</td>
-							<td>{{job.driver}}</td>
+						<tr ng-repeat="vehicle in vehicles">
+							<td>{{vehicle.reg}}</td>
+							<td>{{vehicle.make}}</td>
+							<td>{{vehicle.model}}</td>
+							<td>{{vehicle.vehicleId}}</td>
+							<td>{{vehicle.fleetNo}}</td>
+							<td>{{vehicle.serviceDue | date:'short'}}</td>
 						</tr>
 					</table> 
 				</div>

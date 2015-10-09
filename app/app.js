@@ -8,32 +8,25 @@
 
 
 // Fetch Driver from Parse Database
-    myApp.controller('myController', function ($scope, driverModel, defectsModel, jobsModel){	
+    myApp.controller('myController', function ($scope, driverModel, defectsModel, vehicleModel){  
 		$scope.driverName = null;
-		$scope.defectJobs = [];
-		$scope.jobs = [];
-
+		$scope.vehicles = [];
+		
 		driverModel.getDriverById("kOOsFkwpKX").then(function () {
 			$scope.driverName =  driverModel.getDriverName();
-		});			
 
-		defectsModel.getAllDefectJobs().then(function() {
-
-			$scope.defectJobs = defectsModel.getDefectJobs();	
-
-			$scope.defectJob =  defectsModel.getDefectJobforFleetNo(7);	
-			console.log("defect job for fleet no 7: " +  JSON.stringify($scope.defectJob));			
-
-			jobsModel.getJobByDefectJobID('ntoCGl109c').then(function (aJob) {
-				$scope.job =  aJob;
-				console.log("joblist item for defect ntoCGl109c: " +  JSON.stringify($scope.job));
-			});														
 		});
 
-		jobsModel.getAllJobs().then(function () {
-			$scope.jobs = jobsModel.getJobs();
+		defectsModel.getDefectById("tDnjAnBeHf").then(function () {
+			//
 		});
 
+
+		vehicleModel.getAllActiveTaskVehiclesData().then(function() {
+			$scope.vehicles = vehicleModel.getAllActiveTaskVehicles();
+		});
+
+    	console.log("Finished OK");
     }); 
 }());
 
