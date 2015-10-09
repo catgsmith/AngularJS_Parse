@@ -15,7 +15,6 @@
 		
 		driverModel.getDriverById("kOOsFkwpKX").then(function () {
 			$scope.driverName =  driverModel.getDriverName();
-
 		});
 
 		defectsModel.getDefectById("tDnjAnBeHf").then(function () {
@@ -24,15 +23,36 @@
 
 		driverModel.getDriverOfVehicleByDate();
 
+		
+
 		vehicleModel.getAllActiveTaskVehiclesData().then(function() {
 			$scope.vehicles = vehicleModel.getAllActiveTaskVehicles();
 
-			$scope.aVehicle = vehicleModel.getDefectVehicleforFleetNo("#7");
-			console.log("~app defectVehicle: " +  JSON.stringify($scope.aVehicle));
+			return vehicleModel.getDefectVehicleforFleetNo("#8");
 
-		});
+		}).then(function(_vehicle) {
+				$scope.aVehicle = _vehicle;
+				// For a selected vehicle loop through the active tasks and fetch the driver who reported task
+				var promises = [];
+
+				angular.forEach(_vehicle.tasks, function(task){
+				    // For each item, extend the promise with a function to delete it.
+				    promises.push(driverModel.getDriverById(task.driverId).then(function(aDriver) {
+	
+						task.driver = aDriver;
+						//console.log("~task: " +  JSON.stringify(task));
+					}));
+					
+				});
+				// Return a new promise that is resolved when all of the tasks have driver data added.
+  				return Parse.Promise.when(promises);
+				
+			}). then(function () {
+				console.log("vehicle: " +  JSON.stringify($scope.aVehicle));				
+			});
 
     	console.log("Finished OK");
     }); 
+
 }());
 
