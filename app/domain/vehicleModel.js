@@ -20,21 +20,11 @@
                         defer.reject(error);      
                     });          
                    return defer.promise;
-                }, 
-                getVehicleforFleetNo: function(fleetNo) {
-                    indexes = $.map(vehicles, function(obj, index) {
-                        // FleetNo has # subscript
-                        if (obj.fleetNo == "#" + fleetNo) {
-                            aVehicle = vehicles[index];
-                            return aVehicle;
-                        }
-                    });
-                    return aVehicle;
                 },
                 getAllActiveTaskVehiclesData: function() {
                    var defer = $q.defer();
 
-                   dataService.getAllActiveTaskVehicles().then(function (response) {
+                    dataService.getAllActiveTaskVehicles().then(function (response) {
                         taskVehicles = response;  
                         defer.resolve(taskVehicles);
                     }, function(error) {
@@ -42,6 +32,18 @@
                         defer.reject(error);      
                     });          
                    return defer.promise;
+                },
+                getDefectVehicleforFleetNo: function(fleetNo) {  
+                    ///console.log("~vehicleModel task: " +  JSON.stringify(taskVehicles));                
+                    indexes = $.map(taskVehicles, function(obj, index) {
+                        // FleetNo has # subscript
+                        if (obj.fleetNo == fleetNo) {
+                            return index;
+                        }
+                    });
+                    var first = indexes[0];
+                    aVehicle = taskVehicles[first];
+                    return aVehicle;
                 },
                 getAllVehicles: function() {
                    return vehicles;

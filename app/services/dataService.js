@@ -99,7 +99,7 @@
             // Filter : Only vehicles with active tasks          
             vehicleQuery.exists("activeTasks"); 
             // include : All task details
-            vehicleQuery.include("activeTasks");
+            vehicleQuery.include("activeTasks");            
 
             vehicleQuery.find().then(function (results){                
                     // The collection retrieved successfully.

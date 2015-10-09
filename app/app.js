@@ -11,6 +11,7 @@
     myApp.controller('myController', function ($scope, driverModel, defectsModel, vehicleModel){  
 		$scope.driverName = null;
 		$scope.vehicles = [];
+		$scope.aVehicle = null;
 		
 		driverModel.getDriverById("kOOsFkwpKX").then(function () {
 			$scope.driverName =  driverModel.getDriverName();
@@ -21,9 +22,14 @@
 			//
 		});
 
+		driverModel.getDriverOfVehicleByDate();
 
 		vehicleModel.getAllActiveTaskVehiclesData().then(function() {
 			$scope.vehicles = vehicleModel.getAllActiveTaskVehicles();
+
+			$scope.aVehicle = vehicleModel.getDefectVehicleforFleetNo("#7");
+			console.log("~app defectVehicle: " +  JSON.stringify($scope.aVehicle));
+
 		});
 
     	console.log("Finished OK");

@@ -50,6 +50,7 @@
                 _task.icon = _defect.get("icon");
                 _task.image = _defect.get("image");
                 _task.imageData = _defect.get("imageData");
+                _task.driverId = _defect.get("driver").id;
 
                 _vehicle.tasks.push(_task);
             }

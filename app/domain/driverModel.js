@@ -44,6 +44,9 @@
 
                     return defer.promise;
                 },
+                getDriverOfVehicleByDate: function() {
+                    // TODO
+                },
                 getAllDrivers: function() {
                     return allDrivers;
                 },
