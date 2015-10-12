@@ -7,9 +7,27 @@
     function entityService() {
         // Expose properties as API
         return {
+            buildEntity: buildEntity,
             buildActiveTaskVehicles: buildActiveTaskVehicles,
             buildDefectVehicle: buildDefectVehicle
         };
+
+        function buildEntity(parse_object, entity_properties) {
+            var entity_obj = {};
+            if(parse_object) {               
+                if (!entity_properties) {
+                    entity_obj = JSON.parse(JSON.stringify(parse_object));            
+                } else {
+                    // build entity object dynamically by iterating through properties
+                    angular.forEach(entity_properties, function(value) {
+                        this[value] = parse_object.get(value); // Gets the value of an parse attribute
+                    }, entity_obj);
+
+                    entity_obj.objectId = parse_object.id;
+                }
+            }
+            return entity_obj;
+        }
 
 
         function buildActiveTaskVehicles(payload) {
@@ -25,33 +43,15 @@
         }
 
         function buildDefectVehicle (parse_vehicle) {
-            var _vehicle = {};
-                  
-            _vehicle.vehicleId = parse_vehicle.id;
-            _vehicle.fleetNo = "#"+parse_vehicle.get("fleetNo");               
-            _vehicle.reg = parse_vehicle.get("reg");
-            _vehicle.make = parse_vehicle.get("make");
-            _vehicle.model = parse_vehicle.get("model");
-            _vehicle.serviceDue = parse_vehicle.get("nextService");
+            var _vehicle = buildEntity(parse_vehicle, ["fleetNo", "reg", "make", "model", "nextService"]);
+            _vehicle.fleetNoFilter = "#"+parse_vehicle.get("fleetNo");
             _vehicle.tasks = [];
-            //console.log("vehicle: " + _vehicle.vehicleId);
-            
             
             var _allActiveTasks = parse_vehicle.get("activeTasks");
             for (var j = _allActiveTasks.length - 1; j >= 0; j--) {
-                var _defect = _allActiveTasks[j];
-                var _task = {};
-                _task.taskID = _defect.id;                       
-                _task.desc = _defect.get("desc");
-                _task.urgent = _defect.get("urgent");
-                _task.category = _defect.get("category");
-                _task.title = _defect.get("title");
-                _task.actionTaken = _defect.get("actionTaken");
-                _task.icon = _defect.get("icon");
-                _task.image = _defect.get("image");
-                _task.imageData = _defect.get("imageData");
-                _task.driverId = _defect.get("driver").id;
-
+                var _task = buildEntity(_allActiveTasks[j], ["desc", "urgent", "category", 
+                    "title", "actionTaken", "icon", "image", "imageData"]);
+                _task.driverId = _allActiveTasks[j].get("driver").id; // included in query
                 _vehicle.tasks.push(_task);
             }
             //console.log("vehicle tasks: " +  JSON.stringify(_vehicle.tasks));            

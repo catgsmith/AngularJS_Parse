@@ -1,7 +1,6 @@
 body {
-    background: #eee;
-    text-align: center;
-    padding: 0 25px;
+    font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
+    font-size: 1em;    
 }
 
 #main {
@@ -38,3 +37,14 @@ body {
     color: green;
     line-height: 13px;
 }
+.table > tbody > tr > td {
+  vertical-align: middle; 
+  font-size: 0.8em;    
+}
+
+.table-label-top {
+  font-style: italic;
+  font-size: 0.8em;    
+  padding: 3px 3px 2px 3px;
+  border: 1px solid #ddd;
+  background-color: #eee; }

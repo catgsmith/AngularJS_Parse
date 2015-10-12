@@ -2,15 +2,12 @@
 
     angular.module('myApp').factory('driverModel', driverModel);
 
-    function driverModel($http, $q, dataService) {   
+    function driverModel($http, $q, dataService, entityService) {
             var allDrivers = [];
 
             var driverCache = [];
 
-            var driver = null;
-            var firstName = null;
-            var surname = null; 
-            var fullname = null;
+            var driver = {};
 
             return {
                 getDriverById: function(id) {
@@ -21,13 +18,12 @@
                     if (getDriverInCache(id)) {
                         promise = Parse.Promise.as(driver);
                     } else {
-                        dataService.getDriverData(id).then(function(aDriver) {
-                            driver = aDriver;
-                            driverCache.push(driver);
-                            firstName = driver.get("firstName");
-                            surname = driver.get("surname");
+                        dataService.getDriverData(id).then(function(driverData) {
+                            var aDriver = entityService.buildEntity(driverData, ["firstName", "surname"]);
+                            aDriver.name = aDriver.firstName + " " + aDriver.surname; 
+                            addDriverToCache(aDriver);
 
-                            defer.resolve(driver);
+                            defer.resolve(aDriver);
                         }, function(error) {
                             console.log("Parse error: " + error.message);
                             defer.reject(error);
@@ -35,10 +31,6 @@
                         promise = defer.promise;
                         }
                         return promise;
-                },
-                getDriverName: function() {
-                    fullname = firstName + " " + surname;
-                    return fullname;
                 },
                 getAllDriversData: function() {
                     var defer = $q.defer();
@@ -62,23 +54,41 @@
                 },
                 getDriver: function() {
                     return driver;
-                }, 
+                }
             };
 
-        function getDriverInCache(id) {                                   
-            indexes = $.map(driverCache, function(obj, index) {
-                // FleetNo has # subscript
-                if (obj.id == id) {
-                    return index;
+        function getDriverInCache(id) {
+            var aDriver = null; 
+            if(driverCache.length > 0)  {                                  
+                indexes = $.map(driverCache, function(obj, index) {
+                    // FleetNo has # subscript
+                    if (obj.objectId == id) {
+                        return index;
+                    }
+                });
+                
+                if (indexes.length > 0) {
+                    var first = indexes[0];            
+                    aDriver = driverCache[first];                
                 }
-            });
-            var driver = null;
-            if (indexes.length > 0) {
-                var first = indexes[0];            
-                driver = driverCache[first];                
             }
-            console.log("~getDriverInCache: " +  JSON.stringify(driver) );
-            return driver;
+            return aDriver;
+        }
+        function addDriverToCache(aDriver) {
+            // make sure array is unique
+            if (driverCache.length === 0) { // driver as semaphore
+                driverCache.push(aDriver);
+                driver = aDriver;
+            } else {
+                var uniqueDriver = getDriverInCache(aDriver.objectId);
+                if(uniqueDriver) {
+                    uniqueDriver = aDriver; // store latest version 
+                } else {
+                    driverCache.push(aDriver);
+                    driver = aDriver;                    
+                }
+            }
+            console.log("Log driver Cache: " +  JSON.stringify(driverCache));
         }
     }  
 })();
